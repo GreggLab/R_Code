@@ -7,19 +7,25 @@
 # install.packages("devtools")
 # library(devtools)
 # install_github("easyGgplot2", "kassambara")
-# library(eastGgplot2)
-
+# library(easyGgplot2)
 library(easyGgplot2)
 library(ggsignif) #plots significance
-setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/AlphaDiversity")
-stats <- read.csv(file = "combined.final.p19.groups.summary.csv", header = TRUE)
 
-#specify experimental group of each sample
-type <- c("Met PN", "Met PN", "Met PN", "Met PN", "Met PN", "Met PN", "Met PN", "Met PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN", "Ctrl PN")
+# VARIABLES #######################################################################################
+WORKING.DIRECTORY <- "H:/My Documents/MothurFiles/C7C9_Combined/AlphaDiversity/"
+SUMMARY.FILE <- "combined.final.8wk.groups.summary.csv"
+TITLE <- "8WK Pup Shannon Diversity"
+MET.SAMPLES <- 8
+CTRL.SAMPLES <- 11
+###################################################################################################
+
+setwd(WORKING.DIRECTORY)
+stats <- read.csv(file = SUMMARY.FILE, header = TRUE)
+type <- c(rep("Met PN", MET.SAMPLES), rep("Ctrl PN", CTRL.SAMPLES)) #specify experimental group of each sample
 
 #select shannon data and type and combine
 Ratio <- subset(stats, select = shannon)
-stats.shannon <- cbind(type, shannon)
+stats.shannon <- cbind(type, Ratio)
 
 #plot shannon
 ggplot2.stripchart(stats.shannon, 
@@ -27,7 +33,7 @@ ggplot2.stripchart(stats.shannon,
                    yName='shannon',
                    size = 10, #size of points
                    addBoxplot = TRUE,
-                   mainTitle = "P19 Pup Shannon Diversity",
+                   mainTitle = TITLE,
                    backgroundColor = "white",
                    fill='#FFAAD4',
                    removePanelGrid = TRUE,
@@ -40,9 +46,9 @@ ggplot2.stripchart(stats.shannon,
 
 #################################
 #plot shannon + significance test#
-ggplot(stats.shannon, aes(x=type, y=shannon), mainTitle = "P17 Shannon Diversity") + 
+ggplot(stats.shannon, aes(x=type, y=shannon), mainTitle = TITLE) + 
   geom_boxplot() +
-  geom_signif(comparisons = list(c("Ctrl", "Met")), 
+  geom_signif(comparisons = list(c("Ctrl PN", "Met PN")), 
               map_signif_level=TRUE)
 #################################
 
@@ -69,6 +75,6 @@ ggplot2.stripchart(stats.invsimpson,
 #plot shannon + significance test#
 ggplot(stats.invsimpson, aes(x=type, y=invsimpson), mainTitle = "Inv Simpson Diversity") + 
   geom_boxplot() +
-  geom_signif(comparisons = list(c("Ctrl", "Met")), 
+  geom_signif(comparisons = list(c("Ctrl PN", "Met PN")), 
               map_signif_level=TRUE)
 #################################
