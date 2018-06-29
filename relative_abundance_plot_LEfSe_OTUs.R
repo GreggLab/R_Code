@@ -7,17 +7,28 @@ library(plyr) #tool for splitting, applying, and combining data
 library(stringr) #loaded to use str_replace_all() which removes all special characters in a string
 library(tm) #loaded to use removeNumbers() which removes any number in a string
 
-setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/Abundance_LEFse")
+# VARIABLES #######################################################################################
+WORKING.DIRECTORY <- "H:/My Documents/MothurFiles/C7C9_Combined/Abundance_LEFse/"
+SHARED.FILE <- "combined.final.p19.shared"
+TAXONOMY.FILE <- "combined.final.0.03.cons.taxonomy"
+TITLE <- "8WK Pup Shannon Diversity"
+MET.SAMPLES <- 8
+CTRL.SAMPLES <- 11
+###################################################################################################
+
+
+
+setwd(WORKING.DIRECTORY)
 
 #take LDA found otus and convert shared file to relative abundances
-shared <- read.table(file='combined.final.p19.shared', header=TRUE, row.names = 2) 
+shared <- read.table(file=SHARED.FILE, header=TRUE, row.names = 2) 
 otu <- subset(shared, select = -c(label, numOtus))
 otu.filtered <- subset(otu, select = c(Otu0008, Otu0003, Otu0020, Otu0041, Otu0017, Otu0073, Otu0033, Otu0018, Otu0037, Otu0089, Otu0032, Otu0025, Otu0048, Otu0091, Otu0058, Otu0031, Otu0072)) #otus selected from LDA values and tests
 
 ##TAXONOMY INFO.## 
 ##following code changes label "OTU0001" to corresponding genus/phyla.##
 #get taxonomy file for data on otus
-tax <- read.table("combined.final.0.03.cons.taxonomy",
+tax <- read.table(TAXONOMY.FILE,
                   row.names = 1,
                   header=TRUE,
                   check.names=FALSE,
