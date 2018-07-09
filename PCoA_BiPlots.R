@@ -50,14 +50,15 @@ library(tm) #loaded to use removeNumbers() which removes any number in a string
 
 #args <- commandArgs(TRUE)
 args = vector(mode="character", length=6)
-args[1] = 'combined.final.p19.thetayc.0.03.lt.pcoa.axes'
-args[2] = 'combined.final.p19.thetayc.0.03.lt.pcoa.loadings'
-args[3] = 'combined.final.p19.pearson.corr.axes'
+args[1] = 'combined.final.8wk.thetayc.0.03.lt.pcoa.axes'
+args[2] = 'combined.final.8wk.thetayc.0.03.lt.pcoa.loadings'
+args[3] = 'combined.final.8wk.pearson.corr.axes'
 args[4] = 'combined.final.0.03.cons.taxonomy'
-args[5] = 'combined_P19.design.txt'
+args[5] = 'combined_8WK.design.txt'
 args[6] = 'PCoA_biplot.pdf'
 
-setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/PCoA_Biplots")
+# setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/PCoA_Biplots") #for mac users
+setwd("H:/My Documents/MothurFiles/C7C9_Combined/PCoA_Biplots")#for windows users
 ##################################################
 # (very primitive) command line argument parsing
 #

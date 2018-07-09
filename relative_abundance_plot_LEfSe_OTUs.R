@@ -9,11 +9,11 @@ library(tm) #loaded to use removeNumbers() which removes any number in a string
 
 # VARIABLES #######################################################################################
 WORKING.DIRECTORY <- "H:/My Documents/MothurFiles/C7C9_Combined/Abundance_LEFse/"
-SHARED.FILE <- "combined.final.p19.shared"
+SHARED.FILE <- "combined.final.8wk.shared"
 TAXONOMY.FILE <- "combined.final.0.03.cons.taxonomy"
 TITLE <- "8WK Pup Shannon Diversity"
-MET.SAMPLES <- 8
-CTRL.SAMPLES <- 11
+MET.SAMPLES <- 9
+CTRL.SAMPLES <- 10
 ###################################################################################################
 
 
@@ -81,16 +81,16 @@ for(i in 1:length.data){
 #finish converting shared file to relative abundances
 otu.matrix <- as.matrix(otu.filtered)
 otu.rel <- otu.matrix/rowSums(otu.matrix)
-write.table(otu.rel, "combined.final.p19.rel.txt", quote=FALSE , sep="\t", col.names=NA)
+write.table(otu.rel, "combined.final.8wk.rel.txt", quote=FALSE , sep="\t", col.names=NA)
 
 #combine design files and relative abundance files
-all.otu.rel <- read.table(file="combined.final.p19.rel.txt", sep="\t", header=TRUE, row.names=1)
-otu.design <- read.table(file = "combined_P19.design.txt", header = TRUE)
+all.otu.rel <- read.table(file="combined.final.8wk.rel.txt", sep="\t", header=TRUE, row.names=1)
+otu.design <- read.table(file = "combined_8WK.design.txt", header = TRUE)
 otu.design.otu.rel <- merge(otu.design, all.otu.rel, by.x=c("Sample"), by.y=c("row.names"))
-write.table(otu.design.otu.rel, "otu.p19.design.otu.rel.txt", quote=FALSE, sep="\t", col.names=NA)
+write.table(otu.design.otu.rel, "otu.8wk.design.otu.rel.txt", quote=FALSE, sep="\t", col.names=NA)
 
-#deleted columns A and C in Excel, saved as otu.p19.design.otu.rel.txt
-otu.p19.otu.rel <- read.table(file="otu.p19.design.otu.rel.txt", header=TRUE, sep="\t", row.names=2)
+#delete X column
+otu.p19.otu.rel <- read.table(file="otu.8wk.design.otu.rel.txt", header=TRUE, sep="\t", row.names=2)
 otu.p19.otu.rel <- subset(otu.p19.otu.rel, select = -c(X))
 Met <- as.character(otu.design[otu.design$Group %in% c("M"), c("Sample")])
 Ctrl <- as.character(otu.design[otu.design$Group %in% c("C"), c("Sample")])
@@ -98,6 +98,7 @@ Met.rel <- otu.p19.otu.rel[row.names(otu.p19.otu.rel) %in% Met, ]
 Ctrl.rel <- otu.p19.otu.rel[row.names(otu.p19.otu.rel) %in% Ctrl, ]
 Met.rel <- subset(Met.rel, select = -c(Group))
 Ctrl.rel <- subset(Ctrl.rel, select = -c(Group))
+
 # note: if you want logs for easier viewing:
 log_Met.rel <- log10(Met.rel + 1)
 log_Ctrl.rel <- log10(Ctrl.rel + 1)

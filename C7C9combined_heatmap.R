@@ -11,7 +11,7 @@ library(stringr) #loaded to use str_replace_all() which removes all special char
 library(tm) #loaded to use removeNumbers() which removes any number in a string
 
 #set working directory to where your .shared file is and load file
-setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/Heatmap")
+setwd("H:/My Documents/MothurFiles/C7C9_Combined/Heatmap")
 shared <- read.table(file = "combined.final.shared", header = TRUE, row.names = 2)
 
 
@@ -106,7 +106,7 @@ for(i in 1:length.data){
 #4wk: 156:178
 #8wk: 245:263
 
-otu.filtered.complete <- otu.filtered[45:65,] #OTU FOR P19s
+otu.filtered.complete <- otu.filtered[245:263,] #OTU FOR 8WK
 
 #change otu.filtered to a matrix using as.matrix
 otu.matrix <- as.matrix(otu.filtered.complete)
@@ -115,7 +115,7 @@ otu.matrix <- as.matrix(otu.filtered.complete)
 otu.rel <- otu.matrix/rowSums(otu.matrix)
 otu.rel.max <- apply(otu.rel, 2, max) #2 means columns, apply function max to columns in otu.rel
 otu.rel.filtered <- otu.rel[, otu.rel.max>0.02]
-row.names(otu.rel.filtered) <- c(rep("Ctrl PN", 13), rep("Met PN", 8))
+row.names(otu.rel.filtered) <- c(rep("Ctrl PN", 10), rep("Met PN", 9))
 #create color scheme and relative abundance scales
 myCol3 <- colorRampPalette(brewer.pal(8,"GnBu"))(8) #GnBu.. classic green to blue pallette
 myBreaks2 <- c(0, 0.001, 0.003, 0.01, 0.05, 0.10, 0.50, 0.80, 1) 
@@ -135,12 +135,12 @@ heatmap.2(otu.rel.filtered,
           scale    = "column", #used if want red/blue z-distribution
           tracecol = "#303030", #used if want red/blue z-distribution
           col = bluered, #used if want red/blue z-distribution
-          main     = "P19 Heatmap", #title
+          main     = "8WK Heatmap", #title
           trace    = 'none',
           cexRow = 1, #sets y axis label text size
           cexCol = 1, #reduces x axis label text size
           margins = c(6,6), #sets graph margins
-          srtCol = 30) #adds 30ยบ angle to x axis labels
+          srtCol = 30) #adds 30บ angle to x axis labels
 
 
 
