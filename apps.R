@@ -11,7 +11,9 @@ library(tm) #loaded to use removeNumbers() which removes any number in a string
 library(dplyr)
 library(readr)
 library(rsconnect)
-setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/Stacked_Community_Plots")
+#setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/Stacked_Community_Plots") #for mac users
+setwd("H:/My Documents/MothurFiles/C7C9_Combined/Stacked_Community_Plots") #for windows users
+
 # rsconnect::setAccountInfo(name='gregglab', token='720B02EC7BE6C0476E21919DBC205C2D', secret='dZmyXnLzIElZ6xctWR9r55ttw73Vu0n2fN1fqvVo')
 # rsconnect::deployApp
 ui <- fluidPage(
@@ -159,6 +161,7 @@ server <- function(input, output) {
     })
     
     TIMEPOINT <- input$timepoint
+    PHYLA <- c("Actinobacteria", "Bacteria", "Bacteroidetes", "CandidatusSaccharibacteria","Chloroflexi", "Deferribacteres", "Firmicutes", "Proteobacteria", "Tenericutes", "Verrucomicrobia")
     TITLE <- input$title
     inFile.taxonomy <- input$taxonomy_file
     inFile.samples <- input$samples_file
