@@ -11,8 +11,6 @@ library(stringr) #loaded to use str_replace_all() which removes all special char
 library(tm) #loaded to use removeNumbers() which removes any number in a string
 library(shiny)
 
-setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/Stacked_Community_Plots")
-
 ######ENTER IN VALUES######
 TIMEPOINT <- as.character("8WK")
 TITLE <- "8WK Relative Abundances"
@@ -25,6 +23,9 @@ TXT <- ".txt"
 TAXONOMY.COLOR.FILE <- "taxonomy.color."
 OTU.COMPLETE <- "otu.complete."
 ###########################
+#get into correct directory
+# setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/Stacked_Community_Plots") #mac users
+setwd("H:/My Documents/MothurFiles/C7C9_Combined/Stacked_Community_Plots") #for windows users
 
 #read in raw files 
 tax <- read.table(file=TAXONOMY.FILE, 
@@ -35,7 +36,7 @@ tax <- read.table(file=TAXONOMY.FILE,
 otu.info <- read.table(file=TIMEPOINT.FILE, header=TRUE, row.names = 2) #will become rm_g
 meta <- read.table(file=DESIGN.FILE, row.names = 1, header =TRUE)
 
-#make tax and otu.class same dimensions.  cut out all redundant otus
+#get length values to use later on
 SAMPLE.LENGTH <- as.numeric(nrow(meta))
 TAX.SAMPLE.LENGTH <- SAMPLE.LENGTH + 4 #adds OTU, phyla, genus, color
 TAXONOMY.LENGTH <- as.numeric(nrow(tax))
@@ -46,13 +47,12 @@ PHYLA.LENGTH <- length(PHYLA)
 # - pull phlyum
 # - pull genus
 ##following code changes label "OTU0001" to corresponding genus/phyla.##
+
 #pull just taxonomy string 
 taxonomy <- as.vector(tax[,"Taxonomy"])
 
-#define length of vector for the "for loop"
-
 #create table to store phyla and genus values
-otu.class <- data.frame(matrix(NA, nrow = TAXONOMY.LENGTH, ncol = 5))
+otu.class <- data.frame(matrix(NA, nrow = TAXONOMY.LENGTH, ncol = 5)) #5 for OTU, Size, Phylum, Genus, Full
 colnames(otu.class) <- c("OTU", "Size", "Phylum", "Genus", "Full")
 otu.class$OTU <- rownames(tax) #add otu numbers
 otu.class$Full <- tax$Taxonomy #add taxonomy
@@ -85,15 +85,12 @@ taxonomy.color$Phylum <- otu.class$Phylum
 taxonomy.color$Genus <- otu.class$Genus
 colors <- as.vector(colorRampPalette(brewer.pal(9,"Pastel1"))(9))
 colors[10] <- '#ef8f8d' #add a tenth color becaue pastel1 only offers 9
-# colors <- rev(colors)
-#define length of vector for the "for loop"
-length.color <- as.numeric(nrow(taxonomy.color))
 
 #ran table(taxonomy.color$Phylum) to get all different phylum present
 #and in what frequency
 #created color palette with as many colors as different phylum present
 #assign colors based on phylum, non-conforming samples are assigned black
-for(i in 1:length.color){
+for(i in 1:TAXONOMY.LENGTH){
   if(taxonomy.color$Phylum[i] == 'Actinobacteria'){
     taxonomy.color$Color[i] <- colors[10]
   }
@@ -132,54 +129,41 @@ for(i in 1:length.color){
 
 ###PART 2. CREATE RELATIVE ABUNDANCE FILE###
 otu.matrix <- as.matrix(otu.info)
-otu.rel <- otu.matrix/rowSums(otu.matrix)
+otu.rel <- otu.matrix/rowSums(otu.matrix) #check with 'rowSums(otu.rel)' all rows = 1
 #otu.rel <- subset(otu.rel, select = -c(label, numOtus))
-otu.rel.t <- t(otu.rel) #transpose
+otu.rel.t <- t(otu.rel) #transpose #check with 'colSums(otu.rel.t)' all columns = 1
 otu.rel.t <- as.data.frame(otu.rel.t) #make it so we can add back in OTU names without changing to list
-otu.rel.t$OTU <- rownames(otu.rel.t) #add OTUs so we can merge
+otu.rel.t$OTU <- rownames(otu.rel.t) #add OTUs column so we can merge
 rm_g <- merge(taxonomy.color, otu.rel.t, by.x = "OTU", by.y = "OTU")
 ###PART 2. COMPLETE###
 ### rm_g FILE COMPLETED ###
 
 
 
-otubar <- as.matrix(subset(rm_g, select =-c(Genus, Color)))
-rownames(otubar) <- otubar[,"Phylum"]
-otubar <- subset(otubar, select = -c(Phylum, OTU))
-bar <- as.data.frame(t(otubar))
-bar$SampleID <- meta$SampleID
-bar$Group <- meta$Group
-
-# barg$topotu <- names(barg)[apply(barg, 1, which.max)] #find the highest otu and add it to topotu
-# barg <- merge(barg, otu.class, by.x=c("topotu"), by.y=c("OTU"))
+otubar <- as.matrix(subset(rm_g, select =-c(Genus, Color, OTU))) #delete all columns
+rownames(otubar) <- otubar[,"Phylum"] #keep phylum names by saving them as rownames
+otubar <- subset(otubar, select = -c(Phylum)) #delete phylum column so all cells are numeric
+barg <- as.data.frame(t(otubar))
+barg$SampleID <- meta$SampleID #add IDs
+barg$Group <- meta$Group #add groups
 col.gen <- as.character(rm_g$Color)
-# bar <- merge(barg, meta, by.x = c("SampleID"), by.y = c("SampleID")) #note: you MUST put barg first! otherwise, it will merge incorrectly
+bar_ordered<- barg[order(barg$Group, barg$SampleID),] #order table for splitting
 
-bar_ordered<- bar[order(bar$Group, bar$SampleID),]
 #splits mets and controls
-all<-split(bar_ordered, bar_ordered$Group) 
-met<-all$'MetPN' 
-ctrl<-all$'CtrlPN'
+all <- split(bar_ordered, bar_ordered$Group) 
+met <- all$'MetPN' 
+ctrl <- all$'CtrlPN'
 MET.LENGTH <- as.numeric(nrow(met))
 CTRL.LENGTH <- as.numeric(nrow(ctrl))
+FINAL.LENGTH <- as.numeric(ncol(met))
 
-# write.table(sums.total, "test.txt", quote=FALSE , sep="\t", col.names=NA)
 ###MAKE MET FILE###
-met <- subset(met, select = -c(SampleID, Group))
-met.t <- t(met)
-met.t <- as.data.frame(met.t)
-met.t$Phylum <- rm_g$Phylum
-met.t <- as.matrix(met.t)
-rownames(met.t) <- met.t[,"Phylum"]
-barmet <- met.t[order(met.t[,"Phylum"]),] #sort matrix by phylum
-barmet <- subset(barmet, select = -c(Phylum)) #might need this...
+barmet <- subset(met, select = -c(SampleID, Group))
+barmet <- as.matrix(barmet)
 class(barmet) <- "numeric" #change matrix to numeric form rather than character
-# barmet: met.t without phylum column
-# met.t: all data
+colnames(barmet) <- rm_g[,"Phylum"] #removes numbers from colnames. e.g. Bacteroidetes.1 -> Bacteroidetes
 
 ###phyla only distribution###
-barmet <- as.data.frame(barmet)
-barmet <- t(barmet)
 rows.length <- as.numeric(nrow(barmet))
 cols.length <- as.numeric(ncol(barmet))
 
@@ -253,21 +237,12 @@ class(sums.t) <- "numeric"
 ###FINISH MAKING MET FILE###
 
 ###MAKE CTRL FILE###
-ctrl <- subset(ctrl, select = -c(SampleID, Group))
-ctrl.t <- t(ctrl)
-ctrl.t <- as.data.frame(ctrl.t)
-ctrl.t$Phylum <- rm_g$Phylum
-ctrl.t <- as.matrix(ctrl.t)
-rownames(ctrl.t) <- ctrl.t[,"Phylum"]
-barctrl <- ctrl.t[order(ctrl.t[,"Phylum"]),] #sort matrix by phylum
-barctrl <- subset(barctrl, select = -c(Phylum)) #might need this...
+barctrl <- subset(ctrl, select = -c(SampleID, Group))
+barctrl <- as.matrix(barctrl)
 class(barctrl) <- "numeric" #change matrix to numeric form rather than character
-# barctrl: ctrl.t without phylum column
-# ctrl.t: all data
+colnames(barctrl) <- rm_g[,"Phylum"] #removes numbers from colnames. e.g. Bacteroidetes.1 -> Bacteroidetes
 
 ###phyla only distribution###
-barctrl <- as.data.frame(barctrl)
-barctrl <- t(barctrl)
 rows.length <- as.numeric(nrow(barctrl))
 cols.length <- as.numeric(ncol(barctrl))
 
