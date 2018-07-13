@@ -7,25 +7,47 @@ library(plyr) #tool for splitting, applying, and combining data
 library(stringr) #loaded to use str_replace_all() which removes all special characters in a string
 library(tm) #loaded to use removeNumbers() which removes any number in a string
 
-#set working directory to where your .shared file is and load file
-setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/BF_Ratio")
-shared <- read.table(file = "combined.final.shared", header = TRUE, row.names = 2)
+######ENTER IN VALUES######
+TIMEPOINT <- as.character("8WK")
+TITLE <- "8WK B:F Ratio"
+TIMEPOINT.FILE <- "combined.final.shared"
+NAMES.FILE <- "edited.names.axes.csv"
+GROUPS.FILE <- "combined_8WK.design.txt"
+RATIO.FILE <- "ratio_8wk.csv" #file name for export.  MUST include .csv file extension
+TIMEPOINT.SUBSET <- 245:263
+###########################
+###########################
+#TIMEPOINT.SUBSETS
+#ratio_table[17:24,]: mom p7
+#ratio_table[32:44,]: p17 
+#ratio_table[45:65,]: p19
+#ratio_table[156:178,]: 4wk
+#ratio_table[245:263,]: 8wk
+###########################
 
+
+
+
+#set working directory to where your .shared file is and load file
+# setwd("~/Downloads/Work/MothurFiles/C7C9_Combined/BF_Ratio") #for mac users
+setwd("H://My Documents/MothurFiles/C7C9_Combined/BF_Ratio") #for windows users
 
 #retrieve a subset of shared and save it to new vector "otu"
 #"-c" deletes the columns label and numOtus
+shared <- read.table(file = TIMEPOINT.FILE, header = TRUE, row.names = 2)
 otu <- subset(shared, select =-c(label, numOtus))
 
 #filter out all otus that OVERALL have 200 reads or under. not worth analyzing
 otu.filtered <- otu[, which(colSums(otu) >= 200)]  
 
+###############TAXONOMY CODE###############
 #add ID names and uses naming mechanism in edited.names.axes.csv
 #NAMING MECHANISM:  switched ID names from 251b17 to P17Ctrl1, etc.
 #we'll automatically get a sorted table ordered first by time point and then by group.
 #edited.names.axes.csv is just a pcoa file where the names were manually changed, the sample order matches.
 
 #use code below, not needed for this run
-real.names <- read.csv(file = "edited.names.axes.csv", header = TRUE)
+real.names <- read.csv(file = NAMES.FILE, header = TRUE)
 row.names(otu.filtered) <- row.names(real.names) #row names has correct names
 
 #order table by ID name alphabetically, so we can subset by timepoint later on.  
@@ -81,7 +103,7 @@ for(i in 1:length.data){
     }
   }
 }
-##END TAXONOMY CODE##
+#################END TAXONOMY CODE#################
 
 #data frame now has correctly edited labels and is ordered alphabetically first by timepoint and then by experimental group.  we can now calculate B/F ratios
 
@@ -123,18 +145,24 @@ for(i in 1:length.rows){
 
 #pull just the bacteroidetes sum, firmicutes sum, and ratio so it's easier to look at the table
 ratio_table <- subset(otu.filtered, select = c("BacSum", "FirmSum", "ratio"))
-                
-#subset for a timepoint
-#timepoints
-#ratio_table[17:24,]: mom p7
-#ratio_table[32:44,]: p17 
-#ratio_table[45:65,]: p19
-#ratio_table[156:178,]: 4wk
-#ratio_table[245:263,]: 8wk
+ratio.point <- as.data.frame(ratio_table[TIMEPOINT.SUBSET,]) #subsets timepoint
+write.csv(ratio.point, file = RATIO.FILE) #exports file for excel or prism
 
-ratio.point <- as.data.frame(ratio_table[245:263,]) #subsets timepoint
-write.csv(ratio.point, file = "ratio_8wk.csv") #exports file for excel or prism
-ratio.point$group <- c(rep("Ctrl", 6), rep("Met", 9)) #adds group
+#ADD GROUPS TO EACH SAMPLE
+groups <- read.table(file = GROUPS.FILE, header = TRUE, row.names = 1) #import group types
+# meta <- 
+# ratio.point$group <- c(rep("Ctrl PN", 6), rep("Met PN", 9)) #adds group
+######
+
+#####Calculate Number of Mets and Ctrls######
+groups_ordered<- groups[order(groups$Group, groups$SampleID),] #order table for splittin
+all <- split(groups_ordered, groups_ordered$Group) 
+met <- all$'MetPN' 
+ctrl <- all$'CtrlPN'
+MET.LENGTH <- as.numeric(nrow(met))
+CTRL.LENGTH <- as.numeric(nrow(ctrl))
+ratio.point$group <- c(rep("Ctrl PN", CTRL.LENGTH), rep("Met PN", MET.LENGTH))
+############CALCULATION COMPLETE############
 
 #calculate means and se to make plot
 ratio.graph <- aggregate(ratio.point$ratio,
@@ -158,7 +186,7 @@ barCenters <- barplot(height = ratio.graph$Ratio,
                       col    = c("white", "black"), #makes control bar white and met bar black
                       beside = true, las = 2,
                       cex.names = 0.75, xaxt = "n",
-                      main   = "8WK Bacteroidetes/Firmicutes Ratio",
+                      main   = TITLE,
                       border = "black", axes = TRUE)
 
 #add error bars
