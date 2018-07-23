@@ -12,7 +12,7 @@ TIMEPOINT <- as.character("8WK")
 TITLE <- "8WK B:F Ratio"
 TIMEPOINT.FILE <- "combined.final.shared"
 NAMES.FILE <- "edited.names.axes.csv"
-GROUPS.FILE <- "combined_8WK.design.txt"
+DESIGN.FILE <- "combined_8WK.design.txt"
 RATIO.FILE <- "ratio_8wk.csv" #file name for export.  MUST include .csv file extension
 TIMEPOINT.SUBSET <- 245:263
 ###########################
@@ -149,7 +149,7 @@ ratio.point <- as.data.frame(ratio_table[TIMEPOINT.SUBSET,]) #subsets timepoint
 write.csv(ratio.point, file = RATIO.FILE) #exports file for excel or prism
 
 #ADD GROUPS TO EACH SAMPLE
-groups <- read.table(file = GROUPS.FILE, header = TRUE, row.names = 1) #import group types
+groups <- read.table(file = DESIGN.FILE, header = TRUE, row.names = 1) #import group types
 # meta <- 
 # ratio.point$group <- c(rep("Ctrl PN", 6), rep("Met PN", 9)) #adds group
 ######

@@ -150,3 +150,4 @@ colnames(log_Met.rel) <- as.character(mini.taxonomy)
 ######END EDIT LABEL NAMES######
 #print labels
 axis(2, at=seq(1,index-2,2)+0.6, labels=colnames(log_Met.rel), las=1, line=-0.5, tick=F, cex.axis=0.75, font = 3)
+
